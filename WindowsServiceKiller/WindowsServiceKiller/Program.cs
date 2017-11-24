@@ -74,6 +74,7 @@ namespace WindowsServiceKiller
                         proc.Kill();
                     }
                 }
+                System.Threading.Thread.Sleep(5000);
             }
             else
             {
