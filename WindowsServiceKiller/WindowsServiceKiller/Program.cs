@@ -16,10 +16,16 @@ namespace WindowsServiceKiller
             InvalidUsage = -1
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args">0->Nome do Serviço;1->Timeout antes de fazer o kill;2->Sleep</param>
+        /// <returns></returns>
         static int Main(string[] args)
         {
             var processName = "";
             int timeOut = 60;
+            int sleep = 5;
 
             try
             {
@@ -29,15 +35,17 @@ namespace WindowsServiceKiller
                     return (int)ExitCode.InvalidUsage;
                 }
                 processName = args[0];
-                if (args.Length > 1)
+                if (args.Length >= 2)
                 {                    
                     timeOut = Convert.ToInt16(args[1]);
                 }
 
-                if (timeOut > 600)
-                    timeOut = 600;
+                if (args.Length >= 3)
+                {
+                    sleep = Convert.ToInt16(args[2]);
+                }
 
-                StopAndKillProcess(processName, timeOut);
+                StopAndKillProcess(processName, timeOut, sleep);
                 return (int)ExitCode.Success;
             }
             catch (Exception ex)
@@ -47,9 +55,17 @@ namespace WindowsServiceKiller
             }
         }
 
-        private static void StopAndKillProcess(string processName,int timeOutToKill)
+        private static void StopAndKillProcess(string processName,int timeOutToKill,int sleepAfertKill)
         {
             ServiceController sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName.Equals(processName));
+
+            if (timeOutToKill > 600)
+                timeOutToKill = 600;
+
+            if (sleepAfertKill==0)
+                sleepAfertKill = 5;            
+            else if (sleepAfertKill > 600)
+                sleepAfertKill=600;
 
             if (sc != null)
             {
@@ -74,7 +90,7 @@ namespace WindowsServiceKiller
                         proc.Kill();
                     }
                 }
-                System.Threading.Thread.Sleep(5000);
+                System.Threading.Thread.Sleep(sleepAfertKill*1000);
             }
             else
             {
